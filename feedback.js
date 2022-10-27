@@ -1,5 +1,3 @@
-const feedback = require('companion-module-irisdown-countdowntimer/feedback')
-
 module.exports = {
 	/**
 	 * Get the available feedbacks.

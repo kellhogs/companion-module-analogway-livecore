@@ -1,29 +1,29 @@
 {
-    "config" : {
-        "Ascender48" : {
-            "inCount": 48,
-            "screenCount": 4,
-            "outCount": 4
-        },
-        "Ascrender32" : {
-            "inCount": 32,
-            "screenCount": 4,
-            "outCount": 4
-        },
-        "Ascender16" : {
-            "inCount": 16,
-            "screenCount": 4,
-            "outCount": 4
-        },
-        "Nextage16" : {
-            "inCount": 16,
-            "screenCount": 2,
-            "outCount": 2
-        },
-        "Nextage08" : {
-            "inCount": 8,
-            "screenCount": 2,
-            "outCount": 2
-        }
-    }
+	"config": {
+		"Ascender48": {
+			"inCount": 12,
+			"screenCount": 4,
+			"layerCount": 6
+		},
+		"Ascrender32": {
+			"inCount": 12,
+			"screenCount": 4,
+			"layerCount": 4
+		},
+		"Ascender16": {
+			"inCount": 12,
+			"screenCount": 4,
+			"layerCount": 2
+		},
+		"Nextage16": {
+			"inCount": 8,
+			"screenCount": 2,
+			"layerCount": 4
+		},
+		"Nextage08": {
+			"inCount": 8,
+			"screenCount": 2,
+			"layerCount": 2
+		}
+	}
 }
