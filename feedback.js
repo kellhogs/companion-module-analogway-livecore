@@ -15,12 +15,9 @@ module.exports = {
 			label: 'Change style from program source',
 			description: 'If a source is visible in the program, change the style of the button',
 			style: {
-				// The default style change for a boolean feedback
-				// The user will be able to customise these values as well as the fields that will be changed
 				color: this.rgb(255, 255, 255),
 				bgcolor: this.rgb(200, 0, 0),
 			},
-			// options is how the user can choose the condition the feedback activates for
 			options: [
 				{
 					type: 'number',
@@ -38,12 +35,9 @@ module.exports = {
 			label: 'Change style from preview source',
 			description: 'If a source is enabled in the preview scene, change the style of the button',
 			style: {
-				// The default style change for a boolean feedback
-				// The user will be able to customise these values as well as the fields that will be changed
 				color: this.rgb(255, 255, 255),
 				bgcolor: this.rgb(0, 200, 0),
 			},
-			// options is how the user can choose the condition the feedback activates for
 			options: [
 				{
 					type: 'number',
@@ -61,12 +55,9 @@ module.exports = {
 			label: 'Change style from screen selected',
 			description: 'If a screen for global take is selected, change the style of the button',
 			style: {
-				// The default style change for a boolean feedback
-				// The user will be able to customise these values as well as the fields that will be changed
 				color: this.rgb(255, 255, 255),
 				bgcolor: this.rgb(200, 0, 0),
 			},
-			// options is how the user can choose the condition the feedback activates for
 			options: [
 				{
 					type: 'dropdown',

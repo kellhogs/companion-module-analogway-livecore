@@ -4,8 +4,6 @@ const actions = require('./actions')
 const feedback = require('./feedback')
 const presets = require('./presets')
 
-const awconfig = require('./awconfig.json')
-
 let debug
 let log
 
@@ -28,9 +26,7 @@ class instance extends instance_skel {
 		})
 
 		this.firmwareVersion = '0'
-		this.outputs = []
-		this.screens = []
-		this.inputs = []
+		this.device = []
 		this.modelnum
 		this.modelname = ''
 		this.tallyPGM = []
@@ -83,34 +79,17 @@ class instance extends instance_skel {
 				type: 'textinput',
 				id: 'host',
 				label: 'IP-Adress of Livecore Unit',
-				width: 6,
 				default: '192.168.2.140',
 				regex: this.REGEX_IP,
 				tooltip:
 					'Enter the IP-adress of the Livecore unit you want to control. The IP of the unit can be found on the frontpanel LCD.\nIf you want to control stacked configurations, please enter the IP of the master unit.',
 			},
 			{
-				type: 'dropdown',
-				label: 'Model',
-				id: 'model',
-				default: 'Ascender48',
-				choices: [
-					{ id: 'Ascender48', label: 'Ascender 48' },
-					{ id: 'Ascender32', label: 'Ascender 32' },
-					{ id: 'Ascender16', label: 'Ascender 16' },
-					{ id: 'Nextage16', label: 'Nextage 16' },
-					{ id: 'Nextage08', label: 'Nextage 08' },
-				],
-			},
-			{
-				type: 'dropdown',
-				label: 'Port number',
+				type: 'textinput',
 				id: 'port',
+				label: 'Port number',
 				default: '10600',
-				choices: [
-					{ id: '10600', label: '10600 (default)' },
-					{ id: '10500', label: '10500' },
-				],
+				regex: this.REGEX_PORT,
 			},
 		]
 	}
@@ -191,6 +170,7 @@ class instance extends instance_skel {
 
 			// separate buffered stream into lines with responses
 			this.socket.on('data', (chunk) => {
+				//debug('socket data: ' + chunk)
 				var i = 0,
 					line = '',
 					offset = 0
@@ -354,6 +334,7 @@ class instance extends instance_skel {
 				}
 
 				debug('Received line from Livecore:', line)
+				// debug('device:' + this.device)
 			})
 			this.socket.on('end', () => {
 				debug('Disconnected, ok')
