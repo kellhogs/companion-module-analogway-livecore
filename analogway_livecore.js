@@ -63,7 +63,7 @@ class instance extends instance_skel {
 	}
 	/**
 	 * Initialize presets
-	 * 
+	 *
 	 * @param {EventEmitter} system - the brains of the operation
 	 * @access public
 	 */
@@ -331,22 +331,21 @@ class instance extends instance_skel {
 							this.log('error', 'Received unspecified error from Livecore ' + this.config.label + ': ' + line)
 					}
 				}
-
-				if (line.match(/TAopr\d+,(0|1)$/)) {
+				if (line.match(/^\nTAopr\d+,(0|1)$/)) {
 					//Program Tally Information
 					const input = line.replace('TAopr', '').split(',')
 					this.tallyPGM[Number(input[0])] = Number(input[1])
 					//debug('program inputs: ' + tallyPGM)
 					this.checkFeedbacks('input_active')
 				}
-				if (line.match(/TAopw\d+,(0|1)$/)) {
+				if (line.match(/^\nTAopw\d+,(0|1)$/)) {
 					//Preview Tally information
 					const input = line.replace('TAopw', '').split(',')
 					this.tallyPRV[Number(input[0])] = Number(input[1])
 					//debug('preview inputs: ' + tallyPRV)
 					this.checkFeedbacks('input_previewed')
 				}
-				if (line.match(/SPscl\d+,(0|1)$/)) {
+				if (line.match(/^\nSPscl\d+,(0|1)$/)) {
 					//Information about selected screens for global take
 					const screen = line.replace('SPscl', '').split(',')
 					this.activeScreen[Number(screen[0])] = Number(screen[1])
