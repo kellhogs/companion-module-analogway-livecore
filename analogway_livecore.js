@@ -2,7 +2,7 @@ const tcp = require('../../tcp')
 const instance_skel = require('../../instance_skel')
 const actions = require('./actions')
 const feedback = require('./feedback')
-const presets = require('./presets')
+// const presets = require('./presets')
 
 let debug
 let log
@@ -22,13 +22,18 @@ class instance extends instance_skel {
 		Object.assign(this, {
 			...actions,
 			...feedback,
-			...presets,
+			// ...presets,
 		})
 
-		this.firmwareVersion = '0'
-		this.device = []
-		this.modelnum
-		this.modelname = ''
+		this.connected = false
+		this.device = {
+			modelnumber: '0',
+			modelname: '0',
+			state: '0',
+			commandSetVersion: '0',
+			firmwareVersion: '0',
+			connectedDevices: '0',
+		}
 		this.tallyPGM = []
 		this.tallyPRV = []
 		this.activeScreen = []
@@ -63,9 +68,9 @@ class instance extends instance_skel {
 	 * @param {EventEmitter} system - the brains of the operation
 	 * @access public
 	 */
-	presets(system) {
-		this.setPresetDefinitions(this.getPresets())
-	}
+	// presets(system) {
+	// 	this.setPresetDefinitions(this.getPresets())
+	// }
 	/**
 	 * Creates the configuration fields for web config.
 	 *
@@ -98,7 +103,7 @@ class instance extends instance_skel {
 		if (this.socket !== undefined) {
 			this.socket.destroy()
 		}
-
+		this.connected = false
 		debug('destroy', this.id)
 	}
 
@@ -118,6 +123,7 @@ class instance extends instance_skel {
 
 		this.config = config
 		if (resetConnection === true || this.socket === undefined) {
+			this.connected = false
 			this.init_tcp()
 		}
 		this.feedbacks()
@@ -134,9 +140,12 @@ class instance extends instance_skel {
 		debug = this.debug
 		log = this.log
 
+		this.status(this.STATUS_UNKNOWN)
+
 		this.init_tcp()
 		this.feedbacks()
-		this.presets()
+		// this.presets()
+		// this.status(this.STATUS_OK)
 	}
 	/**
 	 * TCP initialization
@@ -158,6 +167,8 @@ class instance extends instance_skel {
 			})
 
 			this.socket.on('error', (err) => {
+				this.status(this.STATUS_ERROR, err)
+
 				this.debug('Network error', err)
 				this.log('error', 'Network error: ' + err.message)
 			})
@@ -170,7 +181,7 @@ class instance extends instance_skel {
 
 			// separate buffered stream into lines with responses
 			this.socket.on('data', (chunk) => {
-				//debug('socket data: ' + chunk)
+				debug('socket data: ' + chunk)
 				var i = 0,
 					line = '',
 					offset = 0
@@ -184,110 +195,126 @@ class instance extends instance_skel {
 			})
 
 			this.socket.on('receiveline', (line) => {
-				if (line.match(/TPcon\d,\d+/)) {
-					if (line.match(/TPcon0,\d+/) == null) {
-						this.log(
-							'error',
-							'Connected to ' +
+				// debug('connected: ' + this.connected)
+				if (this.connected === false) {
+					if (line.match(/TPcon\d,\d+/)) {
+						if (line.match(/TPcon0,\d+/) == null) {
+							this.log(
+								'error',
+								'Connected to ' +
+									this.config.label +
+									', but this is not the master of stacked configuation! Closing connection now.'
+							)
+							this.status(this.STATUS_ERROR, 'Not master of stacked configuration')
+							this.socket.destroy()
+						}
+						this.device.connectedDevices = parseInt(line.match(/TPcon0,(\d)/)[1])
+						if (this.device.connectedDevices < 4) {
+							this.log(
+								'info',
+								this.config.label + ' has ' + (this.device.connectedDevices - 1) + ' other connected controller(s).'
+							)
+							this.sendcmd('?')
+						} else if (this.device.connectedDevices == 4) {
+							this.log('warn', this.config.label + ' has 4 other connected controllers. Maximum reached.')
+							this.sendcmd('?')
+						} else {
+							this.log(
+								'error',
 								this.config.label +
-								', but this is not the master of stacked configuation! Closing connection now.'
-						)
-						this.socket.destroy()
+									' connections limit has been reached! Max 5 controllers possible, but it is ' +
+									this.device.connectedDevices +
+									'! Closing connection now.'
+							)
+							this.status(this.STATUS_ERROR, 'Connections limit reached')
+							this.socket.destroy() // TODO: there should be a possibility for the user to reconnect
+						}
 					}
-					var connectedDevices = parseInt(line.match(/TPcon0,(\d)/)[1])
-					if (connectedDevices < 4) {
-						this.log('info', this.config.label + ' has ' + (connectedDevices - 1) + ' other connected controller(s).')
-						this.sendcmd('?')
-					} else if (connectedDevices == 4) {
-						this.log('warn', this.config.label + ' has 4 other connected controllers. Maximum reached.')
-						this.sendcmd('?')
-					} else {
-						this.log(
-							'error',
-							this.config.label +
-								' connections limit has been reached! Max 5 controllers possible, but it is ' +
-								connectedDevices +
-								'! Closing connection now.'
-						)
-						this.socket.destroy() // TODO: there should be a possibility for the user to reconnect
-					}
-				}
-				if (line.match(/DEV\d+/)) {
-					this.model = parseInt(line.match(/DEV(\d+)/)[1])
-					switch (this.model) {
-						case 97:
-							this.modelname = 'NeXtage 16'
-							break
-						case 98:
-							this.modelname = 'SmartMatriX Ultra'
-							break
-						case 99:
-							this.modelname = 'Ascender 32'
-							break
-						case 100:
-							this.modelname = 'Ascender 48'
-							break
-						case 102:
-							this.modelname = 'Output Expander 16'
-							break
-						case 103:
-							this.modelname = 'Output Expander 32'
-							break
-						case 104:
-							this.modelname = 'Output Expander 48'
-							break
-						case 105:
-							this.modelname = 'NeXtage 16 - 4K'
-							break
-						case 106:
-							this.modelname = 'SmartMatriX Ultra - 4K'
-							break
-						case 107:
-							this.modelname = 'Ascender 32 - 4K'
-							break
-						case 108:
-							this.modelname = 'Ascender 48 - 4K'
-							break
-						case 112:
-							this.modelname = 'Ascender 16'
-							break
-						case 113:
-							this.modelname = 'Ascender 16 - 4K'
-							break
-						case 114:
-							this.modelname = 'Ascender 48 - 4K - PL'
-							break
-						case 115:
-							this.modelname = 'Output Expander 48 - 4K  - PL'
-							break
-						case 116:
-							this.modelname = 'NeXtage 08'
-							break
-						case 117:
-							this.modelname = 'NeXtage 08 - 4K'
-							break
-						case 118:
-							this.modelname = 'Ascender 32 - 4K -PL'
-							break
-						case 119:
-							this.modelname = 'Output Expander 32 - 4K - PL'
-							break
-						default:
-							this.modelname = 'unknown'
-							break
-					}
-					this.log('info', this.config.label + ' Type is ' + this.modelname)
-					this.sendcmd('0,TPver')
-				}
 
-				if (line.match(/TPver\d+/)) {
-					var commandSetVersion = parseInt(line.match(/TPver\d+,(\d+)/)[1])
-					this.log('info', 'Command set version of ' + this.config.label + ' is ' + commandSetVersion)
-					// TODO: Should check the machine state now, will be implemented after feedback system is done
-				}
+					if (line.match(/DEV\d+/)) {
+						this.device.modelnumber = parseInt(line.match(/DEV(\d+)/)[1])
+						switch (this.device.modelnumber) {
+							case 97:
+								this.device.modelname = 'NeXtage 16'
+								break
+							case 98:
+								this.device.modelname = 'SmartMatriX Ultra'
+								break
+							case 99:
+								this.device.modelname = 'Ascender 32'
+								break
+							case 100:
+								this.device.modelname = 'Ascender 48'
+								break
+							case 102:
+								this.device.modelname = 'Output Expander 16'
+								break
+							case 103:
+								this.device.modelname = 'Output Expander 32'
+								break
+							case 104:
+								this.device.modelname = 'Output Expander 48'
+								break
+							case 105:
+								this.device.modelname = 'NeXtage 16 - 4K'
+								break
+							case 106:
+								this.device.modelname = 'SmartMatriX Ultra - 4K'
+								break
+							case 107:
+								this.device.modelname = 'Ascender 32 - 4K'
+								break
+							case 108:
+								this.device.modelname = 'Ascender 48 - 4K'
+								break
+							case 112:
+								this.device.modelname = 'Ascender 16'
+								break
+							case 113:
+								this.device.modelname = 'Ascender 16 - 4K'
+								break
+							case 114:
+								this.device.modelname = 'Ascender 48 - 4K - PL'
+								break
+							case 115:
+								this.device.modelname = 'Output Expander 48 - 4K  - PL'
+								break
+							case 116:
+								this.device.modelname = 'NeXtage 08'
+								break
+							case 117:
+								this.device.modelname = 'NeXtage 08 - 4K'
+								break
+							case 118:
+								this.device.modelname = 'Ascender 32 - 4K -PL'
+								break
+							case 119:
+								this.device.modelname = 'Output Expander 32 - 4K - PL'
+								break
+							default:
+								this.device.modelname = 'unknown'
+								break
+						}
+						this.log('info', this.config.label + ' Type is ' + this.device.modelname)
+						this.sendcmd('0,TPver')
+					}
 
-				if (line.match(/TPdie0/)) {
-					//There is no parameter readback runnning, it can be started now
+					if (line.match(/TPver\d+/)) {
+						this.device.commandSetVersion = parseInt(line.match(/TPver\d+,(\d+)/)[1])
+						this.log('info', 'Command set version of ' + this.config.label + ' is ' + this.device.commandSetVersion)
+						this.sendcmd('PCdgs')
+						// TODO: Should check the machine state now, will be implemented after feedback system is done
+					}
+					if (line.match(/PCdgs\d+/)) {
+						this.device.state = parseInt(line.replace('PCdgs', ''))
+						this.log('info', this.config.label + ' is in state ' + this.device.state)
+						this.sendcmd('TPdie')
+						this.connected = true
+					}
+
+					if (line.match(/TPdie0/)) {
+						//There is no parameter readback runnning, it can be started now
+					}
 				}
 
 				if (line.match(/E\d{2}/)) {
@@ -333,8 +360,8 @@ class instance extends instance_skel {
 					this.checkFeedbacks('screen_active')
 				}
 
-				debug('Received line from Livecore:', line)
-				// debug('device:' + this.device)
+				// debug('Received line from Livecore:', line)
+				// debug('device:' + JSON.stringify(this.device))
 			})
 			this.socket.on('end', () => {
 				debug('Disconnected, ok')
