@@ -305,12 +305,6 @@ class instance extends instance_skel {
 						this.sendcmd('PCdgs')
 						// TODO: Should check the machine state now, will be implemented after feedback system is done
 					}
-					if (line.match(/PCdgs\d+/)) {
-						this.device.state = parseInt(line.replace('PCdgs', ''))
-						this.log('info', this.config.label + ' is in state ' + this.device.state)
-						this.sendcmd('TPdie')
-						this.connected = true
-					}
 
 					if (line.match(/TPdie0/)) {
 						//There is no parameter readback runnning, it can be started now
