@@ -27,16 +27,18 @@ class instance extends instance_skel {
 
 		this.connected = false
 		this.device = {
-			modelnumber: '0',
-			modelname: '0',
-			state: '0',
-			commandSetVersion: '0',
-			firmwareVersion: '0',
-			connectedDevices: '0',
+			modelnumber: 0,
+			modelname: 0,
+			state: 0,
+			commandSetVersion: 0,
+			firmwareVersion: 0,
+			connectedDevices: 0,
 		}
 		this.tallyPGM = []
 		this.tallyPRV = []
 		this.activeScreen = []
+		this.inputs = []
+		this.outputs = []
 
 		this.actions() // export actions
 	}
