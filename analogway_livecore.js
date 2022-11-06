@@ -425,15 +425,16 @@ class instance extends instance_skel {
 				break
 
 			case 'loadinput':
-				cmd = '' + action.options.destscreen + ','
-
-				if (action.options.pgmpvw == '0') {
-					cmd += '0,'
-				} else {
-					cmd += '1,'
-				}
-
-				cmd += action.options.layer + ',' + action.options.input + 'SPPEi'
+				cmd =
+					'' +
+					action.options.destscreen +
+					',' +
+					action.options.pgmpvw +
+					',' +
+					action.options.layer +
+					',' +
+					action.options.input +
+					'SPPEi'
 
 				break
 
