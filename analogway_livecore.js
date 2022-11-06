@@ -424,6 +424,19 @@ class instance extends instance_skel {
 				cmd = filterval + 'PMcat'
 				break
 
+			case 'loadinput':
+				cmd = '' + action.options.destscreen + ','
+
+				if (action.options.pgmpvw == '0') {
+					cmd += '0,'
+				} else {
+					cmd += '1,'
+				}
+
+				cmd += action.options.layer + ',' + action.options.input + 'SPPEi'
+
+				break
+
 			case 'loadpreset':
 				// set scale
 				if (action.options.scale == '0') {
