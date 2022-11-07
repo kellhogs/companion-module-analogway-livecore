@@ -440,24 +440,16 @@ class instance extends instance_skel {
 
 			case 'loadpreset':
 				// set scale
-				if (action.options.scale == '0') {
-					cmd = '0PMlse\n'
-				} else {
-					cmd = '1PMlse\n'
-				}
+				cmd = action.options.scale + 'PMlse\n'
 
 				// set memory to load
-				cmd += '' + (parseInt(action.options.memory) - 1) + 'PMmet\n'
+				cmd += action.options.memory + 'PMmet\n'
 
 				// set destination screen
-				cmd += '' + (parseInt(action.options.destscreen) - 1) + 'PMscf\n'
+				cmd += action.options.destscreen + 'PMscf\n'
 
 				// set preview/program
-				if (action.options.pgmpvw == '0') {
-					cmd += '0PMprf\n'
-				} else {
-					cmd += '1PMprf\n'
-				}
+				cmd += action.options.pgmpvw + 'PMprf\n'
 
 				// do the load
 				cmd += '1PMloa' //last line break is added in sendcmd
