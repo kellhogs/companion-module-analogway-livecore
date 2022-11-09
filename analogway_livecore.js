@@ -33,6 +33,7 @@ class instance extends instance_skel {
 			commandSetVersion: 0,
 			firmwareVersion: 0,
 			connectedDevices: 0,
+			simulated: 0,
 		}
 		this.tallyPGM = []
 		this.tallyPRV = []
@@ -145,6 +146,7 @@ class instance extends instance_skel {
 		this.status(this.STATUS_UNKNOWN)
 
 		this.init_tcp()
+
 		this.feedbacks()
 		// this.presets()
 		// this.status(this.STATUS_OK)
@@ -161,6 +163,8 @@ class instance extends instance_skel {
 			delete this.socket
 		}
 
+		this.status(this.STATUS_WARN, 'Connecting')
+
 		if (this.config.host) {
 			this.socket = new tcp(this.config.host, this.config.port)
 
@@ -169,7 +173,7 @@ class instance extends instance_skel {
 			})
 
 			this.socket.on('error', (err) => {
-				this.status(this.STATUS_ERROR, err)
+				this.status(this.STATE_ERROR, err)
 
 				this.debug('Network error', err)
 				this.log('error', 'Network error: ' + err.message)
@@ -304,12 +308,17 @@ class instance extends instance_skel {
 					if (line.match(/TPver\d+/)) {
 						this.device.commandSetVersion = parseInt(line.match(/TPver\d+,(\d+)/)[1])
 						this.log('info', 'Command set version of ' + this.config.label + ' is ' + this.device.commandSetVersion)
-						this.sendcmd('PCdgs')
 						// TODO: Should check the machine state now, will be implemented after feedback system is done
+						this.sendcmd('SIdev')
 					}
+				}
 
-					if (line.match(/TPdie0/)) {
-						//There is no parameter readback runnning, it can be started now
+				if (line.match(/SIdev\d+/)) {
+					//if line match SIdev1 is 1
+					if (line.match(/SIdev\d+/) == 'SIdev1') {
+						this.device.simulated = true
+						this.log('info', 'Device' + this.config.label + ' is Simulated')
+						this.status(this.STATUS_WARNING, 'Simulated')
 					}
 				}
 
@@ -365,6 +374,19 @@ class instance extends instance_skel {
 				delete this.socket
 			})
 		}
+	}
+
+	getDeviceState() {
+		//check if parameter readback is running
+		this.sendcmd('TPdie').then((data) => {
+			if (data.match(/TPdie0/)) {
+				//request parameter enumeration
+				this.sendcmd('1TPdie').then((data) => {
+					this.log('info', 'Parameter enumeration started')
+					this.log(data)
+				})
+			}
+		})
 	}
 
 	feedback(feedback) {
