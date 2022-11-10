@@ -84,6 +84,10 @@ module.exports = {
 							{ id: 1, label: 'Screen 2' },
 							{ id: 2, label: 'Screen 3' },
 							{ id: 3, label: 'Screen 4' },
+							{ id: 4, label: 'Screen 5' },
+							{ id: 5, label: 'Screen 6' },
+							{ id: 6, label: 'Screen 7' },
+							{ id: 7, label: 'Screen 8' },
 						],
 					},
 					{
@@ -136,6 +140,10 @@ module.exports = {
 							{ id: 1, label: 'Screen 2' },
 							{ id: 2, label: 'Screen 3' },
 							{ id: 3, label: 'Screen 4' },
+							{ id: 4, label: 'Screen 5' },
+							{ id: 5, label: 'Screen 6' },
+							{ id: 6, label: 'Screen 7' },
+							{ id: 7, label: 'Screen 8' },
 						],
 					},
 					{
