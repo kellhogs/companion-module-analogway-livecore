@@ -465,7 +465,7 @@ class instance extends instance_skel {
 				cmd = action.options.scale + 'PMlse\n'
 
 				// set memory to load
-				cmd += action.options.memory + 'PMmet\n'
+				cmd += parseInt(action.options.memory) - 1 + 'PMmet\n'
 
 				// set destination screen
 				cmd += action.options.destscreen + 'PMscf\n'
